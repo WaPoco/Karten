@@ -1,11 +1,9 @@
-const request = () => new XMLHttpRequest();
-
 const A = "Puerto Montt";
 const B = "Playa Pucatrihue";
 let targetCor = [];
 let route = [];
 
-const key = '';
+const key = '5b3ce3597851110001cf62485ee1afa419994d2fb32977a21838312f';
 const requestParams = `?api_key=${key}`;
 const header = { method: 'GET', headers: {
     'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8'}};
@@ -33,31 +31,63 @@ const getRoute = async () => {
 
 const showMapAnimation = async() => {
     await getRoute();
-    var map = L.map('map').setView(route[0], 12);
+    var map = L.map('map').setView(new L.LatLng(route[0][0],route[0][1]), 12);
+    var bounds = map.getBounds();
+    console.log(bounds);
+    var southWest = bounds.getSouthWest();
+    var northEast = bounds.getNorthEast();
+    console.log(southWest);
+    console.log(northEast);
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
     var autoIcon = L.icon({ iconUrl: 'icon_auto.png', iconSize: [38, 30] }); // Pfad zu Ihrem Auto-Icon
     var marker = L.marker(route[0], {icon: autoIcon, rotationAngle: 0}).addTo(map);
     var i = 0;
     var angle = 0;
 
-    function angleBetweenVectorsMathJS(a, b) {
+    function angleBetweenVectors(a, b) {
         const Dot = math.dot(a,b);
         const magA = math.norm(a);
         const magB = math.norm(b);
         const cosAngle = Dot / (magA * magB);
         return Math.acos(cosAngle) * (180 / Math.PI); // Ergebnis in Grad
     }
-    // Beispiel
-    let vectorA = [0, 0];
-    const vectorB = [-1, 0];
-    console.log(angleBetweenVectorsMathJS(vectorA,vectorB));
+
+    function toRadians(degrees) {
+        return degrees * (Math.PI / 180);
+      }
+    function toDegree(radian) {
+        return  radian*(180 / Math.PI);
+    }
+      
+    function convertGeoToSpherical(latitude, longitude) {
+        // Umwandlung des Breitengrades in den Polarwinkel theta
+        let theta = toRadians(90 - latitude);
+        // Der Längengrad bleibt gleich, muss aber in Radiant umgewandelt werden
+        let phi = toRadians(longitude);
+      
+        return {theta, phi };
+    }
+
+    function polar(radius, phi) {
+        return [radius*Math.cos(phi),radius*Math.sin(phi)];
+    }
+      
+    // Beispiel: Umwandlung für Berlin (52.5200° N, 13.4050° E)
+    const { theta, phi } = convertGeoToSpherical(-41.455636, -72.936745);
+    console.log(`Theta: ${toDegree(theta)}, Phi: ${toDegree(phi)}`);
+      
     function moveAuto() {
         if (i < route.length) {
             map.setView(new L.LatLng(route[i][0], route[i][1]), map.getZoom());
             marker.setLatLng(new L.LatLng(route[i][0], route[i][1]));
-            vectorA[0] = math.subtract(route[i+1], route[i])[0];
-            vectorA[1] = math.subtract(route[i+1], route[i])[1];
-            angle = vectorA[0]>0 ? angleBetweenVectorsMathJS(vectorA, vectorB)-180 : -angleBetweenVectorsMathJS(vectorA, vectorB)+180 ;
+            let {theta , phi} = convertGeoToSpherical(route[i][0],route[i][1]);
+            let {theta1, phi1} = convertGeoToSpherical(route[i+1][0],route[i+1][1])
+            let m = 2*6371*Math.tan(theta/2);
+            let m1 = 2*6371*Math.tan(theta1/2);
+            console.log("alpha="+toDegree(phi)+","+"r="+m);
+            let r_n  =  math.subtract(polar(m1,phi1),polar(m,phi));            
+            angle = angleBetweenVectors(r_n,[0,1]);
             console.log(angle);
             setTimeout(marker.setRotationAngle(angle),100);
             i++;
