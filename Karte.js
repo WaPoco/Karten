@@ -1,10 +1,10 @@
-
-const A = "Puerto Montt";
-const B = "Playa Pucatrihue";
+let A = "";
+let B = "";
 let targetCor = [];
 let route = [];
+const button = document.getElementById("ready");
 
-const key = '';
+const key = '5b3ce3597851110001cf62485ee1afa419994d2fb32977a21838312f';
 const requestParams = `?api_key=${key}`;
 const header = { method: 'GET', headers: {
     'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8'}};
@@ -29,11 +29,24 @@ const getRoute = async () => {
         });
     }
 };
-
+function toDegree(radian) {
+    return  radian*(180 / Math.PI);
+}
 
 function toRadians(degrees) {
     return degrees * (Math.PI / 180);
-  }
+}
+
+function angleBetweenVectors(a, b) {
+    const a_new = [a[1],a[0]];
+    const Dot = math.dot(a_new,b);
+    const magA = math.norm(a);
+    const magB = math.norm(b);
+    const cosAngle = Dot / (magA * magB);
+    const sign = a_new[0]>0 ? 1 : -1;
+    const angle = sign*Math.acos(cosAngle);
+    return toDegree(angle); // Ergebnis in Grad
+}
 
 const showMapAnimation = async() => {
     await getRoute();
@@ -46,27 +59,6 @@ const showMapAnimation = async() => {
     var i = 0;
     var angle = 0;
 
-    function angleBetweenVectors(a, b) {
-        const a_new = [a[1],a[0]];
-        const Dot = math.dot(a_new,b);
-        const magA = math.norm(a);
-        const magB = math.norm(b);
-        const cosAngle = Dot / (magA * magB);
-        let sign = 1;
-        if(a_new[0]>0 && a_new[1]> 0 || a_new[0]>0 && a_new[1]< 0) {
-            sign=1;
-        } else if(a_new[0]<0 && a_new[1]> 0 || a_new[0]<0 && a_new[1]< 0 ) {
-            sign=-1;
-        }
-        return sign*Math.acos(cosAngle) * (180 / Math.PI); // Ergebnis in Grad
-    }
-
-    function toRadians(degrees) {
-        return degrees * (Math.PI / 180);
-      }
-    function toDegree(radian) {
-        return  radian*(180 / Math.PI);
-    }
       
     function moveAuto() {
         if (i < route.length) {
@@ -74,15 +66,23 @@ const showMapAnimation = async() => {
             marker.setLatLng(new L.LatLng(route[i][0], route[i][1]));
             let r_n  =  math.subtract(route[i+1],route[i]);
             angle = angleBetweenVectors(r_n,[0,1]);
-            /*
-            console.log(r_n[1]+","+r_n[0]);
-            console.log(angle);
-            */
-            setTimeout(marker.setRotationAngle(angle),300);
+            marker.setRotationAngle(angle);
             i++;
-            setTimeout(moveAuto, 300); // Bewegt das Auto jede Sekunde
+            setTimeout(moveAuto, 2000); // Bewegt das Auto jede Sekunde
+        } else {
+            return;
         }
     }
     moveAuto();
 }
-showMapAnimation();
+
+function Animation () {
+    A = document.getElementById("Start").value;
+    B = document.getElementById("End").value;
+    showMapAnimation();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    button.addEventListener('click',Animation);
+});
+
