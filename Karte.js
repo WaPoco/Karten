@@ -4,7 +4,7 @@ let targetCor = [];
 let route = [];
 const button = document.getElementById("ready");
 
-const key = '5b3ce3597851110001cf62485ee1afa419994d2fb32977a21838312f';
+const key = '';
 const requestParams = `?api_key=${key}`;
 const header = { method: 'GET', headers: {
     'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8'}};
