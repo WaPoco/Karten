@@ -1,10 +1,11 @@
-let A = "";
-let B = "";
+import {chileBoundary} from './chileBoundary.js';
 let targetCor = [];
 let route = [];
+let map;
+let A, B;
 const button = document.getElementById("ready");
 
-const key = '5b3ce3597851110001cf62485ee1afa419994d2fb32977a21838312f';
+const key = '';
 const requestParams = `?api_key=${key}`;
 const header = { method: 'GET', headers: {
     'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8'}};
@@ -19,7 +20,7 @@ const getCoordinate = async (city) => {
 };
 
 const getRoute = async () => {
-    await Promise.all([getCoordinate(A),getCoordinate(B)]);
+    await Promise.all([await getCoordinate(A),await getCoordinate(B)]);
     const urlToFetch = `https://api.openrouteservice.org/v2/directions/driving-car${requestParams}&start=${targetCor[0]}&end=${targetCor[1]}`;
     const response = await fetch(urlToFetch, header);
     if(response.ok) {
@@ -47,13 +48,44 @@ function angleBetweenVectors(a, b) {
     const angle = sign*Math.acos(cosAngle);
     return toDegree(angle); // Ergebnis in Grad
 }
+/*
+--Dieser Teil sollte die Landesgrenzen von Chile auf der Karte in Rot markieren.--
+
+const Intro = async () => {
+    return new Promise((resolve)=>{
+        setTimeout(() => {
+            chileBoundary.forEach((element)=>{
+            element.forEach((e)=>{
+                let chileBoundary_swap = [];
+                e.forEach((m)=> { 
+                    chileBoundary_swap.push([m[1],m[0]]);
+                    });
+                var polyline = L.polyline(chileBoundary_swap, {color: 'red'}).addTo(map);
+                });
+            });
+            resolve();
+        },3000);
+    });
+
+}
+*/
+const Zoom = async (i) => {
+    return new Promise((resolve)=>{
+        setTimeout(()=>{
+            map.setView(new L.LatLng(route[0][0], route[0][1]), i);
+            resolve(); 
+        },250);
+        });
+    }
 
 const showMapAnimation = async() => {
-    await getRoute();
-    var map = L.map('map').setView(new L.LatLng(route[0][0],route[0][1]), 12);
-
-
+    //await Intro();
+    map = L.map('map').setView(new L.LatLng(0,0),2);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+    await getRoute();
+    for(let i = 5; i<=12;i++) {
+        await Zoom(i);
+    }
     var autoIcon = L.icon({ iconUrl: 'icon_auto.png', iconSize: [38, 30] }); // Pfad zu Ihrem Auto-Icon
     var marker = L.marker(route[0], {icon: autoIcon, rotationAngle: 0}).addTo(map);
     var i = 0;
@@ -68,7 +100,7 @@ const showMapAnimation = async() => {
             angle = angleBetweenVectors(r_n,[0,1]);
             marker.setRotationAngle(angle);
             i++;
-            setTimeout(moveAuto, 2000); // Bewegt das Auto jede Sekunde
+            setTimeout(moveAuto, 25); // Bewegt das Auto jede Sekunde
         } else {
             return;
         }
@@ -82,7 +114,8 @@ function Animation () {
     showMapAnimation();
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    button.addEventListener('click',Animation);
-});
+
+button.addEventListener('click',Animation);
+
+
 
