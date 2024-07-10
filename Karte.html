@@ -1,23 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Auto Animation auf Karte</title>
+    <title>Fahrten Simulator</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="./leaflet.rotatedMarker.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.0/math.js" type="text/javascript"></script>
-    <link  rel="stylesheet" src="./Karte.css" />
-    <style>
-        #map { height: 800px; width: 1500px; }
-    </style>
+    <link  rel="stylesheet" href="./Karte.css" />
 </head>
 <body>
+    <header>
+        <h1>Fahrten Simulator</h1>
+    </header>
     <div id="Route">
+        <label for="Start">Start</label>
         <input id="Start"></input>
-        <input id="End"></input>
+        <label for="Ende">Ende</label>
+        <input id="Ende"></input>
+        <button id="ready">Los</button>
     </div>
-    <button id="ready">Los</button>
-    <div id="map"></div>
-    <script src="./Karte.js" ></script> 
+    <div class="map-container">
+        <div id="map"></div>
+    </div>
+    <script type="module" src="./Karte.js" ></script> 
 </body>
 </html>

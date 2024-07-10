@@ -1,14 +1,17 @@
-import {chileBoundary} from './chileBoundary.js';
+import { key } from "./api_key.js";
 let targetCor = [];
 let route = [];
-let map;
+let map, marker, autoIcon;
 let A, B;
 const button = document.getElementById("ready");
 
-const key = '';
 const requestParams = `?api_key=${key}`;
 const header = { method: 'GET', headers: {
     'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8'}};
+
+map = L.map('map').setView(new L.LatLng(0,0),2);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
 
 const getCoordinate = async (city) => {
     const urlToFetch = `https://api.openrouteservice.org/geocode/search${requestParams}&text=${encodeURIComponent(city)}`;
@@ -76,46 +79,38 @@ const Zoom = async (i) => {
             resolve(); 
         },250);
         });
+    };
+
+function moveAuto(i) {
+    if (i < route.length) {
+        map.setView(new L.LatLng(route[i][0], route[i][1]), map.getZoom());
+        marker.setLatLng(new L.LatLng(route[i][0], route[i][1]));
+        let r_n  =  math.subtract(route[i+1],route[i]);
+
+        let angle = angleBetweenVectors(r_n,[0,1]);
+        marker.setRotationAngle(angle);
+        i++;
+        setTimeout(moveAuto, 50, i); // Bewegt das Auto jede Sekunde
+    } else {
+        return;
     }
+}
 
 const showMapAnimation = async() => {
-    //await Intro();
-    map = L.map('map').setView(new L.LatLng(0,0),2);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
     await getRoute();
     for(let i = 5; i<=12;i++) {
         await Zoom(i);
     }
-    var autoIcon = L.icon({ iconUrl: 'icon_auto.png', iconSize: [38, 30] }); // Pfad zu Ihrem Auto-Icon
-    var marker = L.marker(route[0], {icon: autoIcon, rotationAngle: 0}).addTo(map);
-    var i = 0;
-    var angle = 0;
-
-      
-    function moveAuto() {
-        if (i < route.length) {
-            map.setView(new L.LatLng(route[i][0], route[i][1]), map.getZoom());
-            marker.setLatLng(new L.LatLng(route[i][0], route[i][1]));
-            let r_n  =  math.subtract(route[i+1],route[i]);
-            angle = angleBetweenVectors(r_n,[0,1]);
-            marker.setRotationAngle(angle);
-            i++;
-            setTimeout(moveAuto, 25); // Bewegt das Auto jede Sekunde
-        } else {
-            return;
-        }
-    }
-    moveAuto();
+    autoIcon = L.icon({ iconUrl: './icon_auto.png', iconSize: [38, 30] });
+    marker = L.marker(route[0], {icon: autoIcon, rotationAngle: 0}).addTo(map);
+    moveAuto(0);
 }
 
 function Animation () {
     A = document.getElementById("Start").value;
-    B = document.getElementById("End").value;
+    B = document.getElementById("Ende").value;
     showMapAnimation();
 }
 
 
 button.addEventListener('click',Animation);
-
-
-
