@@ -7,16 +7,17 @@
     <script src="./leaflet.rotatedMarker.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.0/math.js" type="text/javascript"></script>
     <link  rel="stylesheet" href="./Karte.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playwrite+PE:wght@100..400&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
         <h1>Fahrten Simulator</h1>
     </header>
     <div id="Route">
-        <label for="Start">Start</label>
-        <input id="Start"></input>
-        <label for="Ende">Ende</label>
-        <input id="Ende"></input>
+        <label for="Start">Start:</label>
+        <input id="Start" required></input>
+        <label for="Ende">Ziel:</label>
+        <input id="Ende" required></input>
         <button id="ready">Los</button>
     </div>
     <div class="map-container">
